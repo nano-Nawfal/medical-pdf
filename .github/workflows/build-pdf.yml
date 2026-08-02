@@ -1,0 +1,61 @@
+name: Build pdf.json
+
+on:
+  push:
+    paths:
+      - "pdf/**"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Generate pdf.json
+        shell: bash
+        run: |
+          echo "[" > pdf.json
+
+          first=true
+
+          find pdf -type f -name "*.pdf" | while read file; do
+
+            filename=$(basename "$file")
+            title="${filename%.pdf}"
+
+            if [ "$first" = true ]; then
+              first=false
+            else
+              echo "," >> pdf.json
+            fi
+
+            printf '{
+  "title":"%s",
+  "description":"",
+  "category":"غير مصنف",
+  "language":"العربية",
+  "author":"",
+  "pages":"",
+  "size":"",
+  "year":"",
+  "cover":"",
+  "pdf":"https://%s.github.io/%s/%s"
+}' \
+"$title" \
+"${{ github.repository_owner }}" \
+"${{ github.event.repository.name }}" \
+"$file" >> pdf.json
+
+          done
+
+          echo "]" >> pdf.json
+
+      - name: Commit pdf.json
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update pdf.json automatically"
