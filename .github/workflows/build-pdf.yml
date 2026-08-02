@@ -3,6 +3,7 @@ name: Build pdf.json
 on:
   push:
     paths:
+      - '*.pdf'
       - '**/*.pdf'
 
 permissions:
@@ -21,15 +22,15 @@ jobs:
           find . -type f -name "*.pdf" | while read -r filepath; do
             cleanpath="${filepath#./}"
             
-            # استخراج اسم المجلد كـ تصنيف
+            # استخراج اسم المجلد كـ تصنيف للكتب
             category=$(dirname "$cleanpath")
             if [ "$category" = "." ]; then
               category="كتب عامة"
             fi
             
-            # استخراج اسم الملف كعنوان
+            # استخراج اسم الملف كعنوان للكتاب
             filename=$(basename "$cleanpath" .pdf)
-            title="${filename//_/ }" # استبدال الشرطة السفلى بمسافات
+            title="${filename//_/ }"
             
             if [ "$first" = true ]; then
               first=false
@@ -40,8 +41,8 @@ jobs:
             echo "  {" >> pdf.json
             echo "    \"title\": \"$title\"," >> pdf.json
             echo "    \"category\": \"$category\"," >> pdf.json
-            echo "    \"size\": \"ملف PDF طبي\"," >> pdf.json
-            echo "    \"url\": \"https://raw.githubusercontent.com/nano-Nawfal/medical-pdf-library/main/$cleanpath\"" >> pdf.json
+            echo "    \"size\": \"PDF\"," >> pdf.json
+            echo "    \"url\": \"https://raw.githubusercontent.com/nano-Nawfal/medical-pdf/main/$cleanpath\"" >> pdf.json
             echo "  }" >> pdf.json
           done
           echo "]" >> pdf.json
